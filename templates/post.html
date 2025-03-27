@@ -1,0 +1,134 @@
+{% include "header.html" %}
+{% from "bootstrap5/form.html" import render_form %}
+
+
+<!-- Page Header-->
+<header class="masthead" style="background-image: url('{{post.img_url}}')">
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="post-heading">
+          <h1>{{ post.title }}</h1>
+          <h2 class="subheading">{{ post.subtitle }}</h2>
+          <span class="meta"
+            >Posted by
+            <a href="#">{{ post.author.name }}</a>
+            on {{ post.date }}
+          </span>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</header>
+
+<!-- Post Content -->
+<article>
+  <div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        {{ post.body|safe }}
+
+        <div class="d-flex justify-content-between mb-4">
+
+          {%if current_user.id==1 %}
+            <!-- Delete Button (aligned to the left) -->
+            <a
+              class="btn btn-danger"
+              href="{{ url_for('delete', post_id=post.id) }}"
+              >✘</a
+            >
+          
+            <!-- Edit Button (aligned to the right) -->
+            <a
+              class="btn btn-primary"
+              href="{{ url_for('edit_post', post_id=post.id) }}"
+              >Edit Post</a
+            >
+          {% endif %}
+        </div>
+        <p></p>  
+
+        <!-- add comment using ckeditor -->
+          {{ ckeditor.load() }}
+          {{ ckeditor.config(name='comment') }}
+
+          <!-- create the wtf quick form field -->
+          {{render_form(form, novalidate=True, button_map={'submit': 'btn btn-primary'})}}
+          
+          
+          
+          <!-- display comment -->
+          <style>
+            .commentList {
+              list-style-type: none; /* Removes default list styling */
+              padding: 0;
+            }
+          
+            .commentList li {
+              display:flex;              /* Enables inline layout */
+              align-items: center;        /* Vertically aligns the picture and text */
+              margin-bottom: 1px;        /* Adds space between comments */
+            }
+            
+            .comment-avatar {
+              width: 40px;          /* Adjust size to your preference */
+              height: 40px;
+              border-radius: 50%;   /* Makes the image circular */
+              object-fit: cover;    /* Ensures the image fits nicely */
+              margin-right: 10px;   /* Adds spacing between image and text */
+            }
+
+            .commenterImage img {
+              width: 40px;                /* Smaller circular profile picture */
+              height: 40px;
+              border-radius: 50%;         /* Makes the image circular */
+              object-fit: cover;          /* Ensures the image scales nicely */
+              margin-right: 5px;         /* Adds space between the image and the text */
+            }
+          
+            .commentText {
+              /* background-color: #f5f5f5; Adds subtle background color */
+              padding: 2px;             /* Space around the text */
+              border-radius: 10px;       /* Rounded edges for a neat look */
+              font-size: 14px;           /* Size for comment text */
+              color: #333;               /* Color for comment text */
+            }
+          
+            .sub-text {
+              font-size: 12px;           /* Smaller text for comment author */
+              color: #888;               /* Subtle color for author */
+              margin-top: 0px;           /* Space between comment and author */
+              padding-top: 2px;
+            }
+          </style>
+          
+          <div class="comment"></div>
+          <ul class="commentList">
+            {% for comment in post.comments %}
+            <li>
+              <div class="commenterImage">
+                <img
+                  src="{{ gravatar_url(comment.comment_author.email) }}"
+                  alt="{{ comment.comment_author.name }}"
+                  class="comment-avatar"
+                />
+              </div>
+              <div class="commentText">
+                {{ comment.text | safe }}
+                <!-- <span class="sub-text">{{ comment.comment_author.name }}</span> -->
+                <span class="sub-text" style="margin: 0; padding-top: 0; font-size: 12px; color: #888;">{{ comment.comment_author.name }}</span>
+
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          
+          </div>
+
+      </div>
+    </div>
+  </div>
+</article>
+
+{% include "footer.html" %}
