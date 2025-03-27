@@ -1,4 +1,5 @@
 import re
+import os
 from flask import Flask, jsonify, render_template, redirect, url_for, flash,abort,request
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor, CKEditorField
@@ -12,7 +13,7 @@ import hashlib
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 bootstrap = Bootstrap5(app)
 ckeditor = CKEditor(app)
 
@@ -226,4 +227,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5003)
+    app.run(debug=False, port=5003)
