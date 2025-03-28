@@ -20,7 +20,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 bootstrap = Bootstrap5(app)
 ckeditor = CKEditor(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/user/Documents/Programming/Flask/BLOG_CAPSTONE_PROJECT/instance/posts.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL','sqlite:///C:/Users/user/Documents/Programming/Flask/BLOG_CAPSTONE_PROJECT/instance/posts.db')
 db.init_app(app)
 
 
