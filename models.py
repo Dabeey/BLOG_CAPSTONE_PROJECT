@@ -35,7 +35,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(100), unique=True)
-    password: Mapped[str] = mapped_column(String(500))
+    password: Mapped[str] = mapped_column(String(255))
     name: Mapped[str] = mapped_column(String(1000))
 
     # parent relationship with blogpost
