@@ -6,17 +6,20 @@ from flask_ckeditor import CKEditor, CKEditorField
 from datetime import date
 import logging
 from models import Comment, User, db, BlogPost
-from forms import RegisterForm, LoginForm, CreatePostForm, CommentForm  
+from forms import RegisterForm, LoginForm, CreatePostForm, CommentForm , ContactForm
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 from functools import wraps
 import hashlib
+from flask_mail import Mail, Message
+from dotenv import load_dotenv
 
+# load environment variables
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 bootstrap = Bootstrap5(app)
 ckeditor = CKEditor(app)
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/user/Documents/Programming/Flask/BLOG_CAPSTONE_PROJECT/instance/posts.db'
 db.init_app(app)
 
@@ -42,6 +45,18 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
+
+# Email configuration
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER') or os.getenv('MAIL_USERNAME')
+mail = Mail(app)
+
+
 # Admin-only decorator
 def admin_only(f):
     @wraps(f)
@@ -50,6 +65,7 @@ def admin_only(f):
             return abort(403)
         return f(*args, **kwargs)
     return decorated_function
+
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
@@ -204,6 +220,7 @@ def edit_post(post_id):
     return render_template("make-post.html", form=form, is_edit=True, post=post)
 
 
+
 @app.route('/delete/<int:post_id>')
 @login_required
 @admin_only
@@ -215,16 +232,46 @@ def delete(post_id):
     return redirect(url_for("get_all_posts"), post=post)
 
 
+
+
 @app.route("/about")
 def about():
     return render_template("about.html")
 
-@app.route("/contact")
+
+
+
+@app.route('/contact', methods=['GET', 'POST'])
+@login_required
 def contact():
-    return render_template("contact.html")
+    form = ContactForm()
+    message_status = None
+
+    if form.validate_on_submit():
+        try:
+            msg = Message(
+                subject=f"Blogify: New Message from {form.name.data}",
+                recipients=[os.getenv('MAIL_USERNAME')],  # Sends to yourself
+                body=f"""
+                From: {form.name.data} <{form.email.data}>
+                Message: {form.message.data}
+                """
+            )
+            mail.send(msg)
+            message_status = 'success'
+
+            flash('Your message has been sent!', 'success')
+            return redirect(url_for('get_all_posts'))
+        except Exception as e:
+            flash(f'Error sending message: {str(e)}', 'danger')
+    
+    return render_template('contact.html', form=form, message_status=message_status)
+
+
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 if __name__ == "__main__":
-    app.run(debug=False, port=5003)
+    app.run(debug=True, port=5003)
