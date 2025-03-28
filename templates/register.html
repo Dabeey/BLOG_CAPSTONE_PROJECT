@@ -23,16 +23,32 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
+                <!-- Display flashed messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <p class="alert alert-{{ category }}">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+
                 <form action="{{ url_for('register') }}" method="POST">
-                    {{render_form(form)}}
-                    <div class="form-group">
+                    {{ render_form(form) }}
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                        <div class="text-center mt-3">
+                            <span class="text-muted">Already have an account?</span>
+                            <a href="{{ url_for('login') }}" class="btn btn-link">
+                                Login Here
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </main>
-
 
 {% endblock %}
 
